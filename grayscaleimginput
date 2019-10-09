@@ -1,0 +1,5 @@
+I = imread('rice.png');
+BW = imbinarize(I, 'adaptive');
+figure
+imshowpair(I,BW,'montage');
+X=BW(:);
