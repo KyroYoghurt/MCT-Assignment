@@ -26,3 +26,13 @@ xlabel('E_b/N_0 (dB)')
 ylabel('Bit Error Rate')
 title('16 QAM Modulation in AWGN')
 grid on
+
+
+M = 16;                         % Modulation order
+x = (0:15)';                    % Integer input
+y1 = qammod(x,16,'bin');        % 16-QAM output
+%Use the scatterplot function to plot the constellation diagram and annotate it with binary representations of the constellation points.
+scatterplot(y1)
+text(real(y1)+0.1, imag(y1), dec2bin(x))
+title('16-QAM, Binary Symbol Mapping')
+axis([-4 4 -4 4])
