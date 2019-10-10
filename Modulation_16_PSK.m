@@ -5,7 +5,10 @@ pskDemodulator = comm.PSKDemodulator(16,'BitOutput',true,'SymbolMapping','Custom
 
 
 constellation(pskModulator)
-
+Fs = 1000;
+t = 0:1/Fs:1-1/Fs;
+x = cos(2*pi*100*t)+randn(size(t));
+plot(psd(spectrum.periodogram,x,'Fs',Fs,'NFFT',length(x)))
 awgnChannel = comm.AWGNChannel('BitsPerSymbol',log2(16));
 
 errorRate = comm.ErrorRate;
