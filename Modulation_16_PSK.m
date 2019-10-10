@@ -51,3 +51,11 @@ xlabel('Eb/No (dB)')
 ylabel('BER')
 grid
 legend('Simulation','Theory','location','ne')
+
+M = 16;             % Modulation alphabet size
+phOffset = 0;       % Phase offset
+symMap = 'binary';  % Symbol mapping (either 'binary' or 'gray')
+%Construct the modulator object.
+pskModulator = comm.PSKModulator(M,phOffset,'SymbolMapping',symMap);
+%Plot the constellation.
+constellation(pskModulator)
