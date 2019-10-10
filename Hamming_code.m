@@ -2,8 +2,8 @@ clear
 n = 7 %codeword bits
 k = 4 %message bits
 A = [ 1 1 1; 1 1 0; 1 0 1; 0 1 1 ]; %Parity submatrix            
-G = [ eye(k) A ] %Generator matrix
-H = [ A' eye(n-k) ] %Parity-check matrix
+G = [ A eye(k)  ] %Generator matrix
+H = [ eye(n-k) A'] %Parity-check matrix
 %x = [1 0 1 1 0 1 0 1 1 1 1 1]
 len = length(x)-3;
 %ENCODING%
