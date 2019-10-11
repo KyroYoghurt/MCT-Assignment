@@ -27,3 +27,8 @@ dataOut = fskdemod(rxSig,M,freqsep,nsamp,Fs);
 BER_theory = berawgn(EbNo,'fsk',M,'noncoherent');
 [BER BER_theory]
 
+Fs = 1000;
+t = 0:1/Fs:1-1/Fs;
+x = cos(2*pi*100*t)+randn(size(t));
+figure(1)
+plot(psd(spectrum.periodogram,x,'Fs',Fs,'NFFT',length(x)))
