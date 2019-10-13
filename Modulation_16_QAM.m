@@ -29,20 +29,19 @@ title('16 QAM Modulation in AWGN')
 grid on
 
 
+figure(2)
+t1=0:length(modulatedata)-1;
+plot(t1,modulatedata)
+xlabel('Time')
+ylabel('Modulated Signal')
+title('Time domain plot for 16 QAM Modulation')
+
 M = 16;                         % Modulation order
 x = (0:15)';                    % Integer input
 y1 = qammod(x,16,'bin');        % 16-QAM output
 %Use the scatterplot function to plot the constellation diagram and annotate it with binary representations of the constellation points.
-figure(2)
+%figure(3)
 scatterplot(y1)
 text(real(y1)+0.1, imag(y1), dec2bin(x))
 title('16-QAM, Binary Symbol Mapping')
 axis([-4 4 -4 4])
-
-%PSD
-Fs = 1000;
-t = 0:1/Fs:1-1/Fs;
-x = cos(2*pi*100*t)+randn(size(t));
-figure(3)
-plot(psd(spectrum.periodogram,x,'Fs',Fs,'NFFT',length(x)))
-awgnChannel = comm.AWGNChannel('BitsPerSymbol',log2(16));
