@@ -1,0 +1,24 @@
+clc;
+clear all;
+close all;
+
+EbN0=-5:10;   % Define range of Eb/N0 for calculations
+trans_msg=[1 0 0 1 1 0 1]; % from function
+decoded_msg_hamm=[1 0 0 0 1 0 0]; % from hamming decoding function
+decoded_msg_BCH=[1 0 0 1 0 1 0 ]; % from BCH decoding function
+decoded_msg_conv=[0 1 0 1 1 1 1]; % from convolutional decoding function
+
+for j=1:length(EbN0)
+    
+    [numerrhamm(j),errratehamm(j)] = biterr(trans_msg,decoded_msg_hamm); %Find number of Error Bits and Error Rate
+    [numerrBCH(j),errrateBCH(j)] = biterr(trans_msg,decoded_msg_BCH);
+    [numerrconv(j),errrateconv(j)] = biterr(trans_msg,decoded_msg_conv);
+
+end
+
+figure
+semilogy(EbN0,errratehamm,'b-','linewidth',2)  %Plot BER of Simulated Data
+hold on;
+semilogy(EbN0,errrateBCH,'b-','linewidth',2)  %Plot BER of Simulated Data
+semilogy(EbN0,errrateconv,'b-','linewidth',2)  %Plot BER of Simulated Data
+hold off;
