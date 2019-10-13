@@ -3,12 +3,12 @@ custMap = [0 2 4 6 8 10 12 14 15 13 11 9 7 5 3 1];
 pskModulator = comm.PSKModulator(16,'BitInput',true,'SymbolMapping','Custom', 'CustomSymbolMapping',custMap);
 pskDemodulator = comm.PSKDemodulator(16,'BitOutput',true,'SymbolMapping','Custom','CustomSymbolMapping',custMap);
 
-figure(1)
-constellation(pskModulator)
+
+%constellation(pskModulator)
+
 Fs = 1000;
 t = 0:1/Fs:1-1/Fs;
 x = cos(2*pi*100*t)+randn(size(t));
-figure(2)
 plot(psd(spectrum.periodogram,x,'Fs',Fs,'NFFT',length(x)))
 awgnChannel = comm.AWGNChannel('BitsPerSymbol',log2(16));
 
@@ -46,9 +46,26 @@ end
 
 berTheory = berawgn(ebnoVec,'psk',16,'nondiff');
 
-figure(3)
+figure
 semilogy(ebnoVec,[ber; berTheory])
 xlabel('Eb/No (dB)')
 ylabel('BER')
 grid
 legend('Simulation','Theory','location','ne')
+
+M = 16;             % Modulation alphabet size
+phOffset = 0;       % Phase offset
+symMap = 'binary';  % Symbol mapping (either 'binary' or 'gray')
+%Construct the modulator object.
+
+pskModulator = comm.PSKModulator(M,phOffset,'SymbolMapping',symMap);
+%Plot the constellation.
+
+constellation(pskModulator)
+
+data = randi([0 1],100,1);
+% Modulate the binary data
+modData = pskModulator(data);
+t1=0:length(modData)-1;
+figure(4)
+plot(t1,modData)
