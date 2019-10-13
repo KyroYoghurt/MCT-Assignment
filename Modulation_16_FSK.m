@@ -13,6 +13,9 @@ data = randi([0 M-1],5000,1);
 %% Apply FSK modulation.
 txsig = fskmod(data,M,freqsep,nsamp,Fs);
 
+t1=0:length(txsig)-1;
+figure(1)
+plot(t1,txsig);
 %% Pass the signal through an AWGN channel
 
 
@@ -27,8 +30,3 @@ dataOut = fskdemod(rxSig,M,freqsep,nsamp,Fs);
 BER_theory = berawgn(EbNo,'fsk',M,'noncoherent');
 [BER BER_theory]
 
-Fs = 1000;
-t = 0:1/Fs:1-1/Fs;
-x = cos(2*pi*100*t)+randn(size(t));
-figure(1)
-plot(psd(spectrum.periodogram,x,'Fs',Fs,'NFFT',length(x)))
