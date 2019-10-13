@@ -14,12 +14,13 @@ grid
 
 %% Theoretical Coded BERS
 
-p=qfunc(sqrt(SNR));
+SNR=10.^(EbNo./10);
+p=qfunc(sqrt(SNR));  % Given for BPSK. Change the value of p for the three schemes(16-PSK, 16-FSK, 16-QAM)
 BER_HARD=zeros(1,length(SNR));
 for j=2:n
     BER_HARD=BER_HARD+nchoosek(n,j).*(p.^j).*((1-p).^(n-j));
 end
-semilogy(SNRdB,BER_HARD,'k-','linewidth',2.0);         %Theroritical BER in HARD decoding
+semilogy(SNRdB,BER_HARD,'k-','linewidth',2.0);         % Theroritical BER in decoding
 
 %% Simulated Coded BERS
 
