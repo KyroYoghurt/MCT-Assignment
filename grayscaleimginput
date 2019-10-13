@@ -1,5 +1,6 @@
-I = imread('rice.png');
-BW = imbinarize(I, 'adaptive');
-figure
-imshowpair(I,BW,'montage');
-X=BW(:);
+img = imread("tiger_grayscale.jpg");
+a = dec2bin(img);
+
+[i l] = size(a);
+a = a';
+a = reshape(a,[1,i*l]);
