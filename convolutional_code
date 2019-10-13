@@ -1,6 +1,6 @@
 K=3;
-G1=7;
-G2=5;
+G1=5;
+G2=7;
 msg=[1 1 0 0 1 0]
 trel=poly2trellis(K,[G1 G2]);
 coded=convenc(msg,trel)
