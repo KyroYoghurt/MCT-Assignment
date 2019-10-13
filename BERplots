@@ -1,6 +1,27 @@
-clc;
-clear all;
-close all;
+%% Uncoded Theoretical BERs
+
+EbNo = (0:10)';
+figure;
+M = 16;
+berP = berawgn(EbNo,'psk',M,'nondiff');
+berQ = berawgn(EbNo,'qam',M);
+berF = berawgn(EbNo,'fsk',M,'coherent');
+semilogy(EbNo,[berP berQ berF])
+xlabel('Eb/No (dB)')
+ylabel('BER')
+legend('16-PSK','16-QAM','16-FSK')
+grid
+
+%% Theoretical Coded BERS
+
+p=qfunc(sqrt(SNR));
+BER_HARD=zeros(1,length(SNR));
+for j=2:n
+    BER_HARD=BER_HARD+nchoosek(n,j).*(p.^j).*((1-p).^(n-j));
+end
+semilogy(SNRdB,BER_HARD,'k-','linewidth',2.0);         %Theroritical BER in HARD decoding
+
+%% Simulated Coded BERS
 
 EbN0=-5:10;   % Define range of Eb/N0 for calculations
 trans_msg=[1 0 0 1 1 0 1]; % from function
