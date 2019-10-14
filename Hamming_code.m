@@ -1,4 +1,4 @@
-clear
+function [y] = Hamming_code(x) 
 n = 7 %codeword bits
 k = 4 %message bits
 A = [ 1 1 1; 1 1 0; 1 0 1; 0 1 1 ]; %Parity submatrix            
