@@ -10,6 +10,10 @@ m=[1 0 1 0 1 0 1 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 0 1 0 1 0 1 0 0 0 1 0 1 0 1 0 1
 msg = gf(m);
 disp('Message:');
 disp (msg);
+% t the error correction capability
+[genpoly,t] = bchgenpoly(n,k);
+disp('Error Correcting Capability:');
+disp(t);
 %the coding
 code = bchenc(msg,n,k);
 disp('encoded message:');
