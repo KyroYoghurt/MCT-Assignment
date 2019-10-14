@@ -1,4 +1,10 @@
-y = [1 0 1 1 0 0 1 0 1 0 1 1 0 1 1 1 1 1 1 1 1];
+function [x] = Hamming_Decode(y)
+%y = [1 0 1 1 0 0 1 0 1 0 1 1 0 1 1 1 1 1 1 1 1];
+n = 7 %codeword bits
+k = 4 %message bits
+A = [ 1 1 1; 1 1 0; 1 0 1; 0 1 1 ]; %Parity submatrix            
+G = [ eye(k) A ] %Generator matrix
+H = [ A' eye(n-k) ] %Parity-check matrix
 len = length(y)-6;
 j=1;
 %DECODING%
@@ -28,7 +34,7 @@ for i=1:7:len
 
     %msg = inp; %Message block vector-change to any 4 bit sequence
     %code = mod(msg*G,2)%Encode message
-    z(1,j:j+3) = msg_decoded;
+    x(1,j:j+3) = msg_decoded;
     j = j+4;
 end
-z
+x
