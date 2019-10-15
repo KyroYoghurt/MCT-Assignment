@@ -119,7 +119,7 @@ function ber_with_coding_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of ber_with_coding
 %% Theoretical Coded BERS
 
-SNR=10.^(handles.snr./10);
+SNR=10.^(EbNo./10);
 p=qfunc(sqrt(SNR));  % Given for BPSK. Change the value of p for the three schemes(16-PSK, 16-FSK, 16-QAM)
 BER_HARD=zeros(1,length(SNR));
 for j=2:n
@@ -130,16 +130,16 @@ semilogy(SNRdB,BER_HARD,'k-','linewidth',2.0);         % Theroritical BER in dec
 %% Simulated Coded BERS
 
 EbN0=-5:10;   % Define range of Eb/N0 for calculations
-trans_msg=[1 0 0 1 1 0 1]; % from function
+trans_msg=handles.source;%[1 0 0 1 1 0 1]; % from function
 decoded_msg_hamm=[1 0 0 0 1 0 0]; % from hamming decoding function
 decoded_msg_BCH=[1 0 0 1 0 1 0 ]; % from BCH decoding function
 decoded_msg_conv=[0 1 0 1 1 1 1]; % from convolutional decoding function
 
 for j=1:length(EbN0)
     
-    [numerrhamm(j),errratehamm(j)] = biterr(trans_msg,decoded_msg_hamm); %Find number of Error Bits and Error Rate
-    [numerrBCH(j),errrateBCH(j)] = biterr(trans_msg,decoded_msg_BCH);
-    [numerrconv(j),errrateconv(j)] = biterr(trans_msg,decoded_msg_conv);
+    [numerrhamm(j),errratehamm(j)] = biterr(handles.source,decoded_msg_hamm); %Find number of Error Bits and Error Rate
+    [numerrBCH(j),errrateBCH(j)] = biterr(handles.source,decoded_msg_BCH);
+    [numerrconv(j),errrateconv(j)] = biterr(handles.source,decoded_msg_conv);
 
 end
 
@@ -149,7 +149,6 @@ hold on;
 semilogy(EbN0,errrateBCH,'b-','linewidth',2)  %Plot BER of Simulated Data
 semilogy(EbN0,errrateconv,'b-','linewidth',2)  %Plot BER of Simulated Data
 hold off;
-
 % --- Executes on button press in ber_without_coding.
 function ber_without_coding_Callback(hObject, eventdata, handles)
 % hObject    handle to ber_without_coding (see GCBO)
@@ -178,7 +177,47 @@ function Hamming_decode_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of Hamming_decode
+%function [x] = Hamming_Decode(y)
+%y = [1 0 1 1 0 0 1 0 1 0 1 1 0 1 1 1 1 1 1 1 1];
 
+n = 7 %codeword bits
+k = 4 %message bits
+A = [ 1 1 1; 1 1 0; 1 0 1; 0 1 1 ]; %Parity submatrix            
+G = [ eye(k) A ] %Generator matrix
+H = [ A' eye(n-k) ] %Parity-check matrix
+len = length(y)-6;
+j=1;
+%DECODING%
+for i=1:7:len
+    codewrd = y(1,i:i+6)
+    %codewrd(2)=~codewrd(2);  %Introducing some error
+    syndrome = mod(codewrd * H',2);
+    %Find position of the error in codeword (index)
+    find = 0;
+    for ii = 1:n
+        if ~find
+            errvect = zeros(1,n);
+            errvect(ii) = 1;
+            search = mod(errvect * H',2);
+            if search == syndrome
+                find = 1;
+                index = ii;
+            end
+        end
+    end
+    disp(['Position of error in codeword=',num2str(index)]);
+    correctedcode = codewrd;
+    correctedcode(index) = mod(codewrd(index)+1,2)%Corrected codeword
+    %Strip off parity bits
+    msg_decoded=correctedcode;
+    msg_decoded=msg_decoded(1:4)
+
+    %msg = inp; %Message block vector-change to any 4 bit sequence
+    %code = mod(msg*G,2)%Encode message
+    x(1,j:j+3) = msg_decoded;
+    j = j+4;
+end
+x
 
 % --- Executes on button press in BCH_decode.
 function BCH_decode_Callback(hObject, eventdata, handles)
@@ -257,7 +296,7 @@ x = cos(2*pi*100*t)+randn(size(t));
 figure(2)
 plot(psd(spectrum.periodogram,x,'Fs',Fs,'NFFT',length(x)))
 
-handles.mod_sig = txsig;
+handles.mod_sig = abs(txsig);
 guidata(hObject, handles);
 
 
@@ -268,9 +307,9 @@ function QAM_encoding_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of QAM_encoding
-clc;
-clear all;
-close all;
+% clc;
+% clear all;
+% close all;
 N=10^6; % Number of Bits to be processed
 M=16; %Modulation Order
 k=log2(M); %No of bits per symbol
@@ -342,34 +381,34 @@ errorRate = comm.ErrorRate;
 ebnoVec = 6:18;
 ber = zeros(size(ebnoVec));
 
-for k = 1:length(ebnoVec)
-    
-    % Reset the error counter for each Eb/No value
-    reset(errorRate)
-    % Reset the array used to collect the error statistics
-    errVec = [0 0 0];
-    % Set the channel Eb/No
-    awgnChannel.EbNo = ebnoVec(k);
-    
-    while errVec(2) < 200 && errVec(3) < 1e7
-        % Generate a 1000-symbol frame
-        data = randi([0 1],4000,1);
-        % Modulate the binary data
-        modData = pskModulator(data);
-        % Pass the modulated data through the AWGN channel
-        rxSig = awgnChannel(modData);
-        % Demodulate the received signal
-        rxData = pskDemodulator(rxSig);
-        % Collect the error statistics
-        errVec = errorRate(data,rxData);
-    end
-    
-    % Save the BER data
-    ber(k) = errVec(1);
-end
+% for k = 1:length(ebnoVec)
+%     
+%     % Reset the error counter for each Eb/No value
+%     reset(errorRate)
+%     % Reset the array used to collect the error statistics
+%     errVec = [0 0 0];
+%     % Set the channel Eb/No
+%     awgnChannel.EbNo = ebnoVec(k);
+%     
+%     while errVec(2) < 200 && errVec(3) < 1e7
+%         % Generate a 1000-symbol frame
+%         data = randi([0 1],4000,1);
+%         % Modulate the binary data
+%         modData = pskModulator(data);
+%         % Pass the modulated data through the AWGN channel
+%         rxSig = awgnChannel(modData);
+%         % Demodulate the received signal
+%         rxData = pskDemodulator(rxSig);
+%         % Collect the error statistics
+%         errVec = errorRate(data,rxData);
+%     end
+%     
+%     % Save the BER data
+%     ber(k) = errVec(1);
+% end
 
 
-berTheory = berawgn(ebnoVec,'psk',16,'nondiff');
+% berTheory = berawgn(ebnoVec,'psk',16,'nondiff');
 
 % figure
 % semilogy(ebnoVec,[ber; berTheory])
@@ -614,7 +653,16 @@ function FSK_demod_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of FSK_demod
+M = 16;         % Modulation order
+k = log2(M);
+Fs = 340;       % Sample rate (Hz)
+nsamp = 128;     % Number of samples per symbol
+freqsep = 20;  % Frequency separation (Hz)
 
+txsig = handles.mod_sig;
+rxSig  = awgn(txsig,handles.snr+10*log10(k)-10*log10(nsamp),'measured',[],'dB');
+dataOut = fskdemod(rxSig,M,freqsep,nsamp,Fs);
+disp(dataOut);
 
 % --- Executes on button press in QAM_demod.
 function QAM_demod_Callback(hObject, eventdata, handles)
