@@ -179,7 +179,8 @@ function Hamming_decode_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of Hamming_decode
 %function [x] = Hamming_Decode(y)
 %y = [1 0 1 1 0 0 1 0 1 0 1 1 0 1 1 1 1 1 1 1 1];
-
+y = handles.dem_data;
+y =y';
 n = 7 %codeword bits
 k = 4 %message bits
 A = [ 1 1 1; 1 1 0; 1 0 1; 0 1 1 ]; %Parity submatrix            
@@ -218,6 +219,8 @@ for i=1:7:len
     j = j+4;
 end
 x
+handles.Hamming_decode = x;
+guidata(hObject, handles);
 
 % --- Executes on button press in BCH_decode.
 function BCH_decode_Callback(hObject, eventdata, handles)
@@ -235,6 +238,19 @@ function Convolution_decode_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of Convolution_decode
+%function [x] = ConvolutionDecode(y, tblen)
+y = handles.dem_data;
+y = y';
+tblen = length(y);
+K=3;
+G1=5;
+G2=7;
+trel=poly2trellis(K,[G1 G2]);
+x=vitdec(y,trel,tblen,'trunc','hard')
+
+%tblen = length(x);
+
+
 
 
 % --- Executes on button press in Constellation.
@@ -314,18 +330,19 @@ N=10^6; % Number of Bits to be processed
 M=16; %Modulation Order
 k=log2(M); %No of bits per symbol
 nSymbols=N/k; %No of symbols
-generatedata= randi([0 1],N,1); % Generate bits as 0 & 1
+generatedata= handles.code;
+generatedata=generatedata';
 Modulator = comm.GeneralQAMModulator; % Define modulator for 16 QAM
 Demodulator = comm.GeneralQAMDemodulator;   % Define demodulator for 16 QAM
 modulatedata = step(Modulator,generatedata);  % Modulate bits using 16 QAM
-E_bN_0=-5:10;   % Define range of Eb/N0 for calculations
-SNR = E_bN_0 + 10*log10(k); %Conversion into SNR
-for j=1:length(SNR)
-receivedSig(:,j)= awgn(modulatedata,SNR(j),'measured');    % Add AWGN noise to modulated Data     
-Demodulatedata = step(Demodulator,receivedSig(:,j)); % Demodulate noisy data 
-[numerr(j),errrate(j)] = biterr(generatedata,Demodulatedata); %Find number of Error Bits and Error Rate
-end
-tber = berawgn(E_bN_0,'qam',16,'nondiff');   % Theoretical BER of 16 QAM in AWGN Channel 
+% E_bN_0=-5:10;   % Define range of Eb/N0 for calculations
+% SNR = E_bN_0 + 10*log10(k); %Conversion into SNR
+% for j=1:length(SNR)
+% receivedSig(:,j)= awgn(modulatedata,SNR(j),'measured');    % Add AWGN noise to modulated Data     
+% Demodulatedata = step(Demodulator,receivedSig(:,j)); % Demodulate noisy data 
+% [numerr(j),errrate(j)] = biterr(generatedata,Demodulatedata); %Find number of Error Bits and Error Rate
+% end
+% tber = berawgn(E_bN_0,'qam',16,'nondiff');   % Theoretical BER of 16 QAM in AWGN Channel 
 % figure(1)
 % semilogy(E_bN_0,tber,'mx-','linewidth',2) %Plot Theoretical BER in AWGN
 % hold on
@@ -355,6 +372,10 @@ text(real(y1)+0.1, imag(y1), dec2bin(x))
 title('16-QAM, Binary Symbol Mapping')
 axis([-4 4 -4 4])
 
+handles.mod_sig = modulatedata;
+handles.QAMDemodulator = Demodulator;
+guidata(hObject, handles);
+
 % --- Executes on button press in PSK_encoding.
 function PSK_encoding_Callback(hObject, eventdata, handles)
 % hObject    handle to PSK_encoding (see GCBO)
@@ -363,7 +384,9 @@ function PSK_encoding_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of PSK_encoding
 custMap = handles.code;
-
+M = 16;             % Modulation alphabet size
+phOffset = 0;       % Phase offset
+symMap = 'binary';
 pskModulator = comm.PSKModulator(16,'BitInput',true,'SymbolMapping','Custom', 'CustomSymbolMapping',custMap);
 pskDemodulator = comm.PSKDemodulator(16,'BitOutput',true,'SymbolMapping','Custom','CustomSymbolMapping',custMap);
 
@@ -374,12 +397,12 @@ Fs = 1000;
 t = 0:1/Fs:1-1/Fs;
 x = cos(2*pi*100*t)+randn(size(t));
 plot(psd(spectrum.periodogram,x,'Fs',Fs,'NFFT',length(x)))
-awgnChannel = comm.AWGNChannel('BitsPerSymbol',log2(16));
-
-errorRate = comm.ErrorRate;
-
-ebnoVec = 6:18;
-ber = zeros(size(ebnoVec));
+% awgnChannel = comm.AWGNChannel('BitsPerSymbol',log2(16));
+% 
+% errorRate = comm.ErrorRate;
+% 
+% ebnoVec = 6:18;
+% ber = zeros(size(ebnoVec));
 
 % for k = 1:length(ebnoVec)
 %     
@@ -434,6 +457,9 @@ t1=0:length(modData)-1;
 figure(4)
 plot(t1,modData)
 
+handles.mod_sig = modData;
+handles.pskDemodulator = pskDemodulator;
+guidata(hObject, handles);
 % --- Executes on button press in Hamming_code.
 function Hamming_code_Callback(hObject, eventdata, handles)
 % hObject    handle to Hamming_code (see GCBO)
@@ -663,15 +689,20 @@ txsig = handles.mod_sig;
 rxSig  = awgn(txsig,handles.snr+10*log10(k)-10*log10(nsamp),'measured',[],'dB');
 dataOut = fskdemod(rxSig,M,freqsep,nsamp,Fs);
 disp(dataOut);
-
+handles.dem_data = dataOut;
+guidata(hObject, handles);
 % --- Executes on button press in QAM_demod.
 function QAM_demod_Callback(hObject, eventdata, handles)
 % hObject    handle to QAM_demod (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+Demodulator = handles.QAMDemodulator;
 % Hint: get(hObject,'Value') returns toggle state of QAM_demod
-
+receivedSig = handles.noise;    % Add AWGN noise to modulated Data     
+Demodulatedata = step(Demodulator,receivedSig); % Demodulate noisy data 
+disp(Demodulatedata);
+handles.dem_data = Demodulatedata;
+guidata(hObject, handles);
 
 % --- Executes on button press in PSK_demod.
 function PSK_demod_Callback(hObject, eventdata, handles)
@@ -680,3 +711,12 @@ function PSK_demod_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of PSK_demod
+rxSig = handles.noise;
+ pskDemodulator = handles.pskDemodulator ;
+% % Demodulate the received signal
+         rxData = pskDemodulator(rxSig);
+         disp(rxData);
+% %         % Collect the error statistics
+% %         errVec = errorRate(data,rxData);
+
+
