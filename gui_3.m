@@ -106,14 +106,9 @@ str = fileread('test1.txt');
 ascii = unicode2native(str);
 binary = dec2bin(ascii);
 [i,l] = size(binary);
-bits = zeros(1, i*l);
-k = 1;
-while k<=i
-    a = (k-1)*7 + 1;
-    bits(a:a+6) = binary(i,:);
-    k = k+1;
-end
-bits = bits-48;
+bin_trans = binary';
+bits = reshape(bin_trans,1,[]);
+bits = bits-'0';
 disp(bits);
 handles.source = bits;
 guidata(hObject, handles);
@@ -127,13 +122,15 @@ function img2bits_gen_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of img2bits_gen
 img = imread("tiger_grayscale.jpg");
+%img = img(1:50,1:50,:);
+[x y z]= size(img);
 a = dec2bin(img);
-
-[i l] = size(a);
+a = a-'0';
 a = a';
-a = reshape(a,[1,i*l]);
+a = reshape(a,1,[]);
 disp(a);
-handles.size = size(a);
+handles.image_x = x;
+handles.image_y = y;
 handles.source = a;
 guidata(hObject, handles);
 % --- Executes on button press in aud2bits_gen.
@@ -195,22 +192,49 @@ function bch_encode_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of bch_encode
-% m = 7;
-% n = (2^m)- 1;
-% k=64;
-% m = handles.source; %msg=input('Enter 64 bit message:');
-% msg = gf(m);
-% disp('Message:');
-% disp (msg);
-% % t the error correction capability
-% [genpoly,t] = bchgenpoly(n,k);
-% disp('Error Correcting Capability:');
-% disp(t);
-% %the coding
-% code = bchenc(msg,n,k);
-% disp('encoded message:');
-% c=gf(code);
-% disp(c);
+% 
+% x = handles.source;
+% N = 127;
+% K = 64;
+% enc = comm.BCHEncoder(N,K);
+% len = length(x)-63;
+% for i=1:64:len
+%     inp = x(1,i:i+63)
+%     msg = inp; %Message block vector-change to any 4 bit sequence
+%     code = enc(msg);%Encode message
+%     y(1,z:z+63) = code;
+%     z = z+127;
+% end
+% disp(y); %coded bit stream
+
+
+%function BCHout = BCH(y)
+y = handles.source;
+m = 7;
+n = (2^m)- 1;
+k=64;
+data = y;
+if mod(length(data),64) ~= 0
+            for a = 63:-1:mod(length(data),64)
+            data = [data,0] 
+            end
+end
+
+tdata = reshape(data,[ ],64);
+msg = gf(tdata);
+[genpoly,t] = bchgenpoly(n,k);
+code = bchenc(msg,n,k);
+c=gf(code);
+%disp(c);
+d=c.x;
+d_vect = dec2bin(d');
+dataout = d_vect - '0';
+%d=reshape(d,1,[ ]);
+BCHout=dataout';
+%end
+disp(BCHout);
+handles.code = BCHout;
+guidata(hObject, handles);
 
 % --- Executes on button press in convolution_encode.
 function convolution_encode_Callback(hObject, eventdata, handles)
@@ -296,11 +320,20 @@ figure(2)
 plot(t1,txsig1);
 title('Time domain plot');
 %% Pass the signal through an AWGN channel
+z1=1;
+z2=1;
+for i = 1:length(ebnoVec)
+rxSig1  = awgn(txsig1,ebnoVec(i)+10*log10(k)-10*log10(nsamp),'measured',[],'dB');
+rxSig2  = awgn(txsig2,ebnoVec(i)+10*log10(k)-10*log10(nsamp),'measured',[],'dB');
+y1(z1:(z1+length(rxSig1)-1)) = rxSig1;
+y2(z2:(z2+length(rxSig2)-1)) = rxSig2;
+% BER_theory(i) = berawgn(ebnoVec(i),'fsk',M,'noncoherent');
+% [num1(i),BER1(i)] = biterr(data1,rxsig1);
+% [num2(i),BER2(i)] = biterr(data2,rxsig2);
+z1 = z1+length(rxSig1);
+z2 = z2+length(rxSig2);
 
-
-rxSig1  = awgn(txsig1,EbNo+10*log10(k)-10*log10(nsamp),'measured',[],'dB');
-rxSig2  = awgn(txsig2,EbNo+10*log10(k)-10*log10(nsamp),'measured',[],'dB');
-
+end
 
 
 %% Demodulate the received signal.
@@ -309,20 +342,51 @@ dataOut2 = fskdemod(rxSig2,M,freqsep,nsamp,Fs);
 
 
 %% Calculate the bit error rate.
-[num1,BER1] = biterr(data1,dataOut1);
-[num2,BER2] = biterr(data2,dataOut2);
-
+for i = 1:length(ebnoVec)
+    [num1(i),BER1(i)] = biterr(data1,dataOut1);
+    [num2(i),BER2(i)] = biterr(data2,dataOut2);
+    BER_theory(i) = berawgn(ebnoVec(i),'fsk',M,'noncoherent');
+end
 
 %% Determine the theoretical BER and compare it to the estimated BER.
-BER_theory = berawgn(EbNo,'fsk',M,'noncoherent');
+% BER_theory = berawgn(EbNo,'fsk',M,'noncoherent');
 
 
 % figure
- semilogy(ebnoVec,[BER1;  BER_theory])
- xlabel('Eb/No (dB)')
- ylabel('BER')
- grid
- legend('Simulation-Coded message','Theory','location','ne')
+%  semilogy(ebnoVec,[BER1;  BER_theory])
+%  xlabel('Eb/No (dB)')
+%  ylabel('BER')
+%  grid
+%  legend('Simulation-Coded message','Theory','location','ne')
+
+%  semilogy(SNRdB,BER_th,'k');              %Plot BER
+%  hold on
+%  semilogy(SNRdB,BER_sim,'k*');
+%  legend('Theoretical','Simulation',3);
+%  axis([min(SNRdB) max(SNRdB) 10^(-5) 1]);
+%  hold off
+ebnoVec = 1:16;
+%  figure
+%   semilogy(ebnoVec,BER_theory);
+%   hold on
+%     semilogy(ebnoVec,BER1);
+%   %  semilogy(ebnoVec,BER2);
+%     legend('Theoretical','Simulation-Coded',3);
+%   hold off
+figure
+semilogy(ebnoVec,[BER1; BER2; BER_theory])
+xlabel('Eb/No (dB)')
+ylabel('BER')
+grid
+legend('Simulation-Coded message','Simulation-Uncoded message','Theory','location','ne')
+
+%  xlabel('Eb/No (dB)')
+%  ylabel('BER')
+%  grid
+%  legend('Simulation-Coded message','Theory','location','ne')
+handles.dem1 = dataOut1;
+handles.dem2 = dataOut2;
+guidata(hObject, handles);
 
 
 % --- Executes on button press in psk_mod.
@@ -434,7 +498,7 @@ modData1 = pskModulator(data1);
 t1=0:length(modData1)-1;
 figure(4)
 plot(t1,modData1)
-
+%disp(rxData1);
 % --- Executes on button press in qam_mod.
 function qam_mod_Callback(hObject, eventdata, handles)
 % hObject    handle to qam_mod (see GCBO)
@@ -454,8 +518,8 @@ axis([-4 4 -4 4]);
 
 x1 = handles.code;
 x2 = handles.source;
-x1 =x1';
-x2 = x2';
+ x1 = x1';
+ x2 = x2';
 N1=length(x1); % Number of coded Bits to be processed
 N2=length(x2); % Number of uncoded Bits to be processed
 
@@ -514,7 +578,7 @@ x = receivedSig1;
 figure(4)
 plot(psd(spectrum.periodogram,x,'Fs',Fs,'NFFT',length(x)))
 
-
+disp(Demodulatedata1);
 
 
 handles.dem1 = Demodulatedata1;
@@ -569,7 +633,8 @@ y =y';
      x(1,j:j+3) = msg_decoded;
      j = j+4;
  end
- x
+ x;
+ sub = x - handles.source 
  handles.decode = x;
  guidata(hObject, handles);
 
@@ -580,7 +645,20 @@ function bch_decode_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of bch_decode
+%function bits=BCHdecode(dataout)
+dataout = handles.dem1';
+datain = typecast(dataout,'uint8');
+binary = dec2bin(datain);
+binary = binary';
+binary_db = binary-'0';
+binary_db = reshape(binary_db,[],127);
+binary_db = gf(binary_db);
 
+
+[newmsg,err,ccode] = bchdec(binary_db,127,64);
+bits=newmsg;
+disp(bits);
+%end
 
 % --- Executes on button press in convolutional_decode.
 function convolutional_decode_Callback(hObject, eventdata, handles)
@@ -597,7 +675,8 @@ trellis = poly2trellis(3,[5 7]);
 
 codedData = handles.dem1';
 decodedData = vitdec(codedData,trellis,34,'trunc','hard')
-
+handles.decode = decodedData;
+guidata(hObject, handles);
 % --- Executes on button press in bits2text.
  function bits2text_Callback(hObject, eventdata, handles)
 % hObject    handle to bits2text (see GCBO)
@@ -606,44 +685,45 @@ decodedData = vitdec(codedData,trellis,34,'trunc','hard')
 
 % Hint: get(hObject,'Value') returns toggle state of bits2text
 %function x = convert2Text(bitstream)
- bitstream = handles.decode;
+ bitstream = (handles.decode);
  l = size(bitstream,2)
- nchar = 7
- x = char(zeros(nchar,1))
- k =1;
- for i = 1:7:l
-     c = native2unicode([64 32 16 8 4 2 1].*((bitstream(i:i+6)-48)'));
-     x(k) = c;
-     k=k+1;
- end
- disp(x);
+nchar = floor(l/7);
+x = char(zeros(1,nchar))
+k =1;
+for i = 1:7:(nchar*7);
+    c = native2unicode([64 32 16 8 4 2 1]*bitstream(1,i:i+6)');
+    x(k)=c;
+    k = k+1;
+end
+disp(x);
 % end
 
 % --- Executes on button press in bit2image.
-% function bit2image_Callback(hObject, eventdata, handles)
+ function bit2image_Callback(hObject, eventdata, handles)
 % hObject    handle to bit2image (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of bit2image
 %function image = bits2img(bits,x,y,z)
-% [x y z] = handles.size;
-% bits  = handles.dem2;
-% a = zeros(1,size(bits,2)/8);
-% k=1;
-% for i = 1:8:size(bits,2)
-%     c = bin2dec(bits(i:i+7));
-%     a(k) = c;
-%     k=k+1;
-% end
-% image = reshape(a,[x,y,z]);
-% image = image/255;
-% imshow(image);
+x = handles.image_x;
+y = handles.image_y;
+z = 3;
+bits  = handles.dem1';
+a = zeros(1,60000/8);
+k=1;
+for i = 1:8:size(a,2)*8
+    a(1,k) = [128 64 32 16 8 4 2 1]*(bits(1,i:i+7))';
+    k=k+1;
+end
+image = reshape(a',[x y 3]);
+image = image/255;
+imshow(image);
 % %image = uint8(image);
 % %end
 
 % --- Executes on button press in bits2audio.
-% function bits2audio_Callback(hObject, eventdata, handles)
+ function bits2audio_Callback(hObject, eventdata, handles)
 % hObject    handle to bits2audio (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
