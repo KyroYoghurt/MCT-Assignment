@@ -195,7 +195,22 @@ function bch_encode_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of bch_encode
-
+% m = 7;
+% n = (2^m)- 1;
+% k=64;
+% m = handles.source; %msg=input('Enter 64 bit message:');
+% msg = gf(m);
+% disp('Message:');
+% disp (msg);
+% % t the error correction capability
+% [genpoly,t] = bchgenpoly(n,k);
+% disp('Error Correcting Capability:');
+% disp(t);
+% %the coding
+% code = bchenc(msg,n,k);
+% disp('encoded message:');
+% c=gf(code);
+% disp(c);
 
 % --- Executes on button press in convolution_encode.
 function convolution_encode_Callback(hObject, eventdata, handles)
@@ -575,18 +590,13 @@ function convolutional_decode_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of convolutional_decode
 %function [x] = ConvolutionDecode(y, tblen)
-y = handles.dem1;
-y = y';
-tblen = length(y);
-K=3;
-G1=5;
-G2=7;
-trel=poly2trellis(K,[G1 G2]);
-x=vitdec(y,trel,tblen,'trunc','soft');
-[y1,y2] =size(x)
-tblen = length(x);
-handles.decode = x;
-guidata(hObject, handles);
+trellis = poly2trellis(3,[5 7]);
+
+% Generate random binary data, convolutionally encode the data, and decode the data using the Viterbi algorithm.
+
+
+codedData = handles.dem1';
+decodedData = vitdec(codedData,trellis,34,'trunc','hard')
 
 % --- Executes on button press in bits2text.
  function bits2text_Callback(hObject, eventdata, handles)
