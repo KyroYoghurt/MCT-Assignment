@@ -18,14 +18,8 @@ str = fileread(fileName);
 ascii = unicode2native(str);
 binary = dec2bin(ascii);
 [i,l] = size(binary);
-bits = zeros(1, i*l);
-k = 1;
-while k<=i
-    a = (k-1)*7 + 1;
-    bits(a:a+6) = binary(i,:);
-    k = k+1;
-end
-bits = bits-48;
+bin_trans = binary';
+bits = reshape(bin_trans,1,[]);
 end
 
     
