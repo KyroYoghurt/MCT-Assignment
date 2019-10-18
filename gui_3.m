@@ -289,7 +289,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
+function fsk_mod_Callback(hObject, eventdata, handles)
 M = 16;         % Modulation order
 k = log2(M);   % Bits per symbol
  EbNo = 5;      % Eb/No (dB)
