@@ -322,7 +322,7 @@ plot(psd(spectrum.periodogram,x,'Fs',Fs,'NFFT',length(x)))
     
 t1=0:length(txsig1)-1;
 figure(2)
-plot(t1,txsig1);
+plot(t1,real(txsig1));
 title('Time domain plot');
 %% Pass the signal through an AWGN channel
 z1=1;
@@ -502,7 +502,7 @@ modData1 = pskModulator(data1);
 
 t1=0:length(modData1)-1;
 figure(4)
-plot(t1,modData1)
+plot(t1,real(modData1))
 %disp(rxData1);
 % --- Executes on button press in qam_mod.
 function qam_mod_Callback(hObject, eventdata, handles)
@@ -511,15 +511,15 @@ function qam_mod_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 %Constellation diagram
 % Hint: get(hObject,'Value') returns toggle state of qam_mod
-M = 16;                         % Modulation order
-x = (0:15)';                    % Integer input
-y1 = qammod(x,16,'bin');        % 16-QAM output
+% M = 16;                         % Modulation order
+% x = (0:15)';                    % Integer input
+% y1 = qammod(x,16,'bin');        % 16-QAM output
 %Use the scatterplot function to plot the constellation diagram and annotate it with binary representations of the constellation points.
 %figure(3)
-scatterplot(y1)
-text(real(y1)+0.1, imag(y1), dec2bin(x))
-title('16-QAM, Binary Symbol Mapping')
-axis([-4 4 -4 4]);
+% scatterplot(y1)
+% text(real(y1)+0.1, imag(y1), dec2bin(x))
+% title('16-QAM, Binary Symbol Mapping')
+% axis([-4 4 -4 4]);
 
 x1 = handles.code;
 x2 = handles.source;
@@ -577,6 +577,19 @@ ylabel('Bit Error Rate')
 title('16 QAM Modulation in AWGN for uncoded data')
 grid on
 
+
+ M = 16;                         % Modulation order
+% x = reshape(handles.code,[],;                    % Integer input
+% y1 = qammod(x,16,'bin');        % 16-QAM output
+[rlen collen] = size(receivedSig1); 
+for i = 1: rlen
+    
+ scatterplot(receivedSig1(i,:))
+hold on;
+ % text(real(y1)+0.1, imag(y1), dec2bin(x))
+% title('16-QAM, Binary Symbol Mapping')
+% axis([-4 4 -4 4]);
+end
 
 Fs = 1000;
 t = 0:1/Fs:1-1/Fs;
