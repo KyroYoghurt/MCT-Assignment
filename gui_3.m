@@ -389,7 +389,11 @@ legend('Simulation-Coded message','Simulation-Uncoded message','Theory','locatio
 %  ylabel('BER')
 %  grid
 %  legend('Simulation-Coded message','Theory','location','ne')
-handles.dem1 = dataOut1;
+
+dataOut1 = dec2bin(dataOut1);
+dataOut1 = dataOut1 - '0';
+dataOut1 = reshape(dataOut1',1,[]);
+handles.dem1 = dataOut1';
 handles.dem2 = dataOut2;
 guidata(hObject, handles);
 
@@ -578,25 +582,32 @@ title('16 QAM Modulation in AWGN for uncoded data')
 grid on
 
 
- M = 16;                         % Modulation order
+ %M = 16;                         % Modulation order
 % x = reshape(handles.code,[],;                    % Integer input
 % y1 = qammod(x,16,'bin');        % 16-QAM output
 [rlen collen] = size(receivedSig1); 
-for i = 1: rlen
-    
- scatterplot(receivedSig1(i,:))
-hold on;
- % text(real(y1)+0.1, imag(y1), dec2bin(x))
-% title('16-QAM, Binary Symbol Mapping')
-% axis([-4 4 -4 4]);
-end
-
+% for i = 1: collen
+%     hold on;
+%  scatterplot(receivedSig1(:,i))
+% 
+%  % text(real(y1)+0.1, imag(y1), dec2bin(x))
+% % title('16-QAM, Binary Symbol Mapping')
+% % axis([-4 4 -4 4]);
+% end
+% hold off
 Fs = 1000;
 t = 0:1/Fs:1-1/Fs;
 x = receivedSig1;
 figure(3)
 plot(psd(spectrum.periodogram,x,'Fs',Fs,'NFFT',length(x)))
 
+  M = 16;                         % Modulation order
+  x = (0:15)'                   % Integer input
+ y1 = qammod(x,16,'bin');       
+scatterplot(y1)
+text(real(y1)+0.1, imag(y1), dec2bin(x))
+title('16-QAM, Binary Symbol Mapping')
+axis([-4 4 -4 4]);
 %disp(Demodulatedata1);
 disp("Transmitted data demodulated successfully");
 
