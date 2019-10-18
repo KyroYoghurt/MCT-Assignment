@@ -547,17 +547,17 @@ receivedSig1(:,j)= awgn(modulatedata1,SNR(j),'measured');    % Add AWGN noise to
 Demodulatedata1 = step(Demodulator,receivedSig1(:,j)); % Demodulate noisy coded data 
 [numerr1(j),errrate1(j)] = biterr(x1,Demodulatedata1); %Find number of Error Bits and Error Rate
 end
-tber = berawgn(E_bN_0,'qam',16,'nondiff');   % Theoretical BER of 16 QAM in AWGN Channel 
-figure(2)
-semilogy(E_bN_0,tber,'mx-','linewidth',2) %Plot Theoretical BER in AWGN
-hold on
-semilogy(E_bN_0,errrate1,'b-','linewidth',2)  %Plot BER of Simulated Data
-axis([-6 11 10^-5 1])
-legend ('Theoretical BER','Simulation BER');
-xlabel('E_b/N_0 (dB)')
-ylabel('Bit Error Rate')
-title('16 QAM Modulation in AWGN for coded data')
-grid on
+% tber = berawgn(E_bN_0,'qam',16,'nondiff');   % Theoretical BER of 16 QAM in AWGN Channel 
+% figure(2)
+% semilogy(E_bN_0,tber,'mx-','linewidth',2) %Plot Theoretical BER in AWGN
+% hold on
+% semilogy(E_bN_0,errrate1,'b-','linewidth',2)  %Plot BER of Simulated Data
+% axis([-6 11 10^-5 1])
+% legend ('Theoretical BER','Simulation BER');
+% xlabel('E_b/N_0 (dB)')
+% ylabel('Bit Error Rate')
+% title('16 QAM Modulation in AWGN for coded data')
+% grid on
 
 for j=1:length(SNR)
 receivedSig2(:,j)= awgn(modulatedata2,SNR(j),'measured');    % Add AWGN noise to modulated Data     
@@ -565,13 +565,14 @@ Demodulatedata2 = step(Demodulator,receivedSig2(:,j)); % Demodulate noisy coded 
 [numerr2(j),errrate2(j)] = biterr(x2,Demodulatedata2); %Find number of Error Bits and Error Rate
 end
 tber = berawgn(E_bN_0,'qam',16,'nondiff');   % Theoretical BER of 16 QAM in AWGN Channel 
-figure(3)
+figure(2)
 semilogy(E_bN_0,tber,'mx-','linewidth',2) %Plot Theoretical BER in AWGN
 hold on
-semilogy(E_bN_0,errrate2,'b-','linewidth',2)  %Plot BER of Simulated Data
+semilogy(E_bN_0,errrate1,'k-','linewidth',2)  %Plot BER of Coded Simulated Data
+semilogy(E_bN_0,errrate2,'b-','linewidth',2)  %Plot BER of Uncoded Simulated Data
 axis([-6 11 10^-5 1])
-legend ('Theoretical BER','Simulation BER');
-xlabel('E_b/N_0 (dB)')
+legend ('Theoretical BER','Coded Simulation BER', 'Uncoded Simulation BER');
+xlabel('E_b/N_0 ')
 ylabel('Bit Error Rate')
 title('16 QAM Modulation in AWGN for uncoded data')
 grid on
@@ -580,7 +581,7 @@ grid on
 Fs = 1000;
 t = 0:1/Fs:1-1/Fs;
 x = receivedSig1;
-figure(4)
+figure(3)
 plot(psd(spectrum.periodogram,x,'Fs',Fs,'NFFT',length(x)))
 
 %disp(Demodulatedata1);
@@ -665,6 +666,8 @@ binary_db = gf(binary_db);
 [newmsg,err,ccode] = bchdec(binary_db,127,64);
 bits=newmsg;
 disp(bits);
+handles.decode = bits;
+guidata(hObject, handles);
 %end
 
 % --- Executes on button press in convolutional_decode.
