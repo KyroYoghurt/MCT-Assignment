@@ -52,7 +52,13 @@ The project is majorly divided into the following parts:
 
 ## Getting Started
 
-Download the main .m file alongwith .fig image. To test the code downlaod the attached text, image and audio inputs as well. Ensure that all the files are at a common location and the path to the location has been added to the working folder of MATLAB. 
+Download the .zip file and extract the content. The unzipped folder will contain:  
+1. Main .m file: gui_3.m  
+2. GUI figure: fig_3.fig  
+3. Sample image file: 
+4. Sample text file:
+5. Sample audio file    
+To test the code, downlaod the attached text, image and audio inputs as well. Ensure that all the files are at a common location and the path to the location has been added to the working folder of MATLAB. 
 
 ### Prerequisites
 
@@ -71,7 +77,7 @@ Latest version of MATLAB with the following toolboxes:
 5. Select a modulation scheme: 16 FSK, 16 PSK, 16 QAM and wait for sometime. The BER plot for the selected modulation scheme will appear comparing the theoretical and simulation results for uncoded and coded data. 16 QAM will plot the fastest. Two more plots displaying the time domain graph of the input signal and Power Spectral Density(PSD) will appear. For 16 PSK and 16 QAM, a constellation plot can be observed.  
 6. In the decoding section, select a decoding scheme. Ensure that the decoding scheme is same as the previously chosen coding scheme. For example, if the encoding scheme is (7,4) Hamming Code, the decoding scheme should also be (7,4) Hamming Code.  
 7. Once the decoding is complete, reconstruct the decoded signal by selecting the input signal type in the 'Reconstruction' section. The reconstructed input will be displayed as following if the input was:  
-    a. 'Random bits', a array of bits will appear in command window  
+    a. 'Random bits', an array of bits will appear in command window  
     b. 'Text file', a string will appear in command window  
     c. 'Grayscale Image', an image will appear in the GUI  
     d. 'Audio', an audio output will be heard from the system's inbuilt speakers.  
