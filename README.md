@@ -8,7 +8,6 @@
 * **Shirin Kaushik** - *2017AAPS0229G* - [PurpleBooth](https://github.com/PurpleBooth)  
 * **Harshwardhan Shirodkar** - *2017AAPS0169G* - [PurpleBooth](https://github.com/PurpleBooth)  
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
 
 The aim of the project is to create a GUI for data transmission over various modulation and encoding schemes and studying the BERs plots from theoretical and simulation results. 
 
