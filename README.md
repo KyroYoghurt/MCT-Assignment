@@ -6,7 +6,7 @@
 * **Manish Dash** - *2017AAPS0346G* - [manishdash123](https://github.com/manishdash123)  
 * **Anhadveer Khokar** - *2017A8PS0714G* - [Anhadveer](https://github.com/Anhadveer)  
 * **Shirin Kaushik** - *2017AAPS0229G* - [Shirin04](https://github.com/Shirin04)  
-* **Harshwardhan Shirodkar** - *2017AAPS0169G* - [harshwardhands] (https://github.com/harshwardhands)  
+* **Harshwardhan Shirodkar** - *2017AAPS0169G* - [harshwardhands](https://github.com/harshwardhands)  
 
 
 The aim of the project is to create a GUI for data transmission over various modulation and encoding schemes and studying the BERs plots from theoretical and simulation results. 
