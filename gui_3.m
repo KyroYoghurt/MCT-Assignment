@@ -763,5 +763,30 @@ imshow(image);
 % hObject    handle to bits2audio (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+bits = handles.decode;
+Fs = 48000;
+bin_new = bits';
+size(bits)
+%bin_char = char('0' + bin_new);
+%rebin_char = reshape(bin_char,8,[]);
+%bin_char_trans = rebin_char';
+%size(bin_char_trans)
+%dec = zeros(size(bin_char_trans,1),1);
+%bin_char_trans(45789,:)
+%for i = 1:size(bin_char_trans,1) 
+%dec(i,1) = uint8(bin2dec(bin_char_trans(i,:)));
+%end
+dec = zeros(size(bits,2)/8,1);
+k = 1;
+for i = 1:8:size(bits,2)
+    dec(k) = [128 64 32 16 8 4 2 1]*bits(i:i+7)';
+    k = k+1;
+end
+dec = dec';
+dec_new = typecast(dec,'double');
+x = dec_new./(2^7);
+x = reshape(x,[],2);
+audiowrite('Reconstructed.wav',x,Fs);
+sound(x, Fs);
+guidata(hObject,handles);
 % Hint: get(hObject,'Value') returns toggle state of bits2audio
