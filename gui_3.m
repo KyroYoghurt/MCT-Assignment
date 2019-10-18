@@ -290,14 +290,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on button press in fsk_mod.
-function fsk_mod_Callback(hObject, eventdata, handles)
-% hObject    handle to fsk_mod (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of fsk_mod
-%% Set the simulation parameters.
 M = 16;         % Modulation order
 k = log2(M);   % Bits per symbol
  EbNo = 5;      % Eb/No (dB)
@@ -339,12 +331,13 @@ z1 = z1+length(rxSig1);
 z2 = z2+length(rxSig2);
 
 end
-
+ebno = 8;
+rxSig3  = awgn(txsig1,ebno+10*log10(k)-10*log10(nsamp),'measured',[],'dB');
 
 %% Demodulate the received signal.
 dataOut1 = fskdemod(rxSig1,M,freqsep,nsamp,Fs);
 dataOut2 = fskdemod(rxSig2,M,freqsep,nsamp,Fs);
-
+dataOut3 = fskdemod(rxSig3,M,freqsep,nsamp,Fs);
 
 %% Calculate the bit error rate.
 for i = 1:length(ebnoVec)
@@ -390,12 +383,13 @@ legend('Simulation-Coded message','Simulation-Uncoded message','Theory','locatio
 %  grid
 %  legend('Simulation-Coded message','Theory','location','ne')
 
-dataOut1 = dec2bin(dataOut1);
-dataOut1 = dataOut1 - '0';
-dataOut1 = reshape(dataOut1',1,[]);
-handles.dem1 = dataOut1';
+% dataOut3 = dec2bin(dataOut3);
+% dataOut3 = dataOut3 - '0';
+% dataOut3 = reshape(dataOut3',1,[]);
+handles.dem1 = dataOut3';
 handles.dem2 = dataOut2;
 guidata(hObject, handles);
+
 
 
 % --- Executes on button press in psk_mod.
