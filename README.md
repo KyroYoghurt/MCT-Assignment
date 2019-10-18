@@ -55,9 +55,10 @@ The project is majorly divided into the following parts:
 Download the .zip file and extract the content. The unzipped folder will contain:  
 1. Main .m file: gui_3.m  
 2. GUI figure: fig_3.fig  
-3. Sample image file: 
-4. Sample text file:
-5. Sample audio file    
+3. Sample image file: tiger_grayscale.jpg
+4. Sample text file: test1.txt
+5. Sample audio file  
+
 To test the code, downlaod the attached text, image and audio inputs as well. Ensure that all the files are at a common location and the path to the location has been added to the working folder of MATLAB. 
 
 ### Prerequisites
